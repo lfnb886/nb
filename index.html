@@ -567,6 +567,86 @@
         .announcement-card, .student-card {
             animation: fadeInUp 0.5s ease forwards;
         }
+        
+        /* 新增样式 */
+        .stats-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 180px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast-success {
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #3498db;
+            color: #3498db;
+        }
+        
+        .btn-outline:hover {
+            background: #3498db;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -576,44 +656,66 @@
             <p>实时查看学生名单和最新公告信息</p>
         </div>
         
-        <名单 innerHTML="tabs-container">
-            <//调用服务器 API在我这里 康斯特="tabs">
-                <反应 class="tab active" data-tab="students">
-                    <等待 取来=${></配置>
+        <div class="tabs-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="students">
+                    <i class="fas fa-users"></i>
                     学生名单
-                </公告>
-                <数据 class="tab" data-tab="announcements">
-                    <${ 配置=公告></viewId>
+                </div>
+                <div class="tab" data-tab="announcements">
+                    <i class="fas fa-bullhorn"></i>
                     公告栏
-                </方法>
-            </标题>
+                </div>
+            </div>
             
-            ${
-            <配置 公告=代币 如果="students-tab">
-                <反应 class="data-source-info">
-                    <h3><好的 class="fas fa-database"></掷> 数据连接状态</h3>
-                    <新的>正在从服务器实时同步学生数据 作者: <错误>雾源</@API请求失败：></${>
-                </反应>
+            <!-- 学生名单标签页 -->
+            <div class="tab-content active" id="students-tab">
+                <div class="data-source-info">
+                    <h3><i class="fas fa-database"></i> 数据连接状态</h3>
+                    <p>正在从服务器实时同步学生数据 作者: <code>雾源</code></p>
+                </div>
                 
-                <div 地位="controls">
-                    <div 康斯特="search-box">
-                        <数据 等待=反应></json支持JavaScript对象表示法（json）>
-                        <// 隐藏加载指示器 负荷指示器="text" 风格="search-input" 显示=/更新 API>
-                    </apiStatus指示器>
+                <div class="stats-container" id="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-students">0</div>
+                        <div class="stat-label">总学生数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="class-4-count">0</div>
+                        <div class="stat-label">4班学生</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="class-3-count">0</div>
+                        <div class="stat-label">3班学生</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="filtered-count">0</div>
+                        <div class="stat-label">筛选结果</div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="搜索学生姓名或班级...">
+                    </div>
                     
-                    <类名 class="filter-options">
-                        <“api-指示器api-connected” id="class-filter">
-                            <apiStatusText value="">所有班级</文本内容>
-                            <“已连接到服务器 API” 如果=数据>4班</数据>
-                            <数据 数据=记录>3班</数据>
-                        </数据>
-                    </记录>
+                    <div class="filter-options">
+                        <select id="class-filter">
+                            <option value="">所有班级</option>
+                            <option value="4班">4班</option>
+                            <option value="3班">3班</option>
+                        </select>
+                    </div>
                     
-                    <长度 // 处理并显示公告数据="action-buttons">
-                        <公告 class="btn btn-primary" id="refresh-students-btn">
-                            <i class="fas fa-sync-alt"></数据> 刷新数据
-                        </数据>
-                    </记录>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="refresh-students-btn">
+                            <i class="fas fa-sync-alt"></i> 刷新数据
+                        </button>
+                        <button class="btn btn-outline" id="export-btn">
+                            <i class="fas fa-download"></i> 导出
+                        </button>
+                    </div>
                     
                     <div class="status-indicator" id="status-indicator">
                         <div class="status-dot"></div>
@@ -655,6 +757,9 @@
         </footer>
     </div>
 
+    <!-- 通知提示 -->
+    <div class="toast" id="toast"></div>
+
     <script>
         // 配置信息
         const CONFIG = {
@@ -674,6 +779,7 @@
 
         // 学生数据
         let students = [];
+        let filteredStudents = [];
         
         // DOM 元素
         const studentList = document.getElementById('student-list');
@@ -681,6 +787,14 @@
         const classFilter = document.getElementById('class-filter');
         const refreshStudentsBtn = document.getElementById('refresh-students-btn');
         const connectionStatus = document.getElementById('connection-status');
+        const exportBtn = document.getElementById('export-btn');
+        const toast = document.getElementById('toast');
+        
+        // 统计元素
+        const totalStudentsEl = document.getElementById('total-students');
+        const class4CountEl = document.getElementById('class-4-count');
+        const class3CountEl = document.getElementById('class-3-count');
+        const filteredCountEl = document.getElementById('filtered-count');
         
         // 公告相关DOM元素
         const announcementsList = document.getElementById('announcementsList');
@@ -705,6 +819,7 @@
             searchInput.addEventListener('input', applyFilters);
             classFilter.addEventListener('change', applyFilters);
             refreshStudentsBtn.addEventListener('click', loadStudentsFromVika);
+            exportBtn.addEventListener('click', exportStudentData);
             
             // 标签页切换事件
             tabs.forEach(tab => {
@@ -752,6 +867,7 @@
                     processStudentData(data.data.records);
                     connectionStatus.textContent = "连接正常";
                     connectionStatus.style.color = "#27ae60";
+                    showToast("学生数据已成功加载", "success");
                 } else {
                     throw new Error(data.message || 'API返回错误');
                 }
@@ -769,6 +885,8 @@
                         <p>请检查网络连接和API Token，然后点击刷新按钮重试</p>
                     </div>
                 `;
+                
+                showToast("学生数据加载失败", "error");
             }
         }
 
@@ -784,11 +902,26 @@
                 };
             });
 
+            updateStats();
             applyFilters();
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            totalStudentsEl.textContent = students.length;
+            
+            const class4Count = students.filter(s => s.class === '4班').length;
+            const class3Count = students.filter(s => s.class === '3班').length;
+            
+            class4CountEl.textContent = class4Count;
+            class3CountEl.textContent = class3Count;
+            filteredCountEl.textContent = filteredStudents.length;
         }
 
         // 渲染学生列表
         function renderStudentList(studentsToRender = students) {
+            filteredStudents = studentsToRender;
+            
             if (studentsToRender.length === 0) {
                 studentList.innerHTML = `
                     <div class="empty-state">
@@ -797,6 +930,7 @@
                         <p>请尝试调整搜索条件</p>
                     </div>
                 `;
+                updateStats();
                 return;
             }
             
@@ -820,6 +954,8 @@
                     </div>
                 `;
             }).join('');
+            
+            updateStats();
         }
 
         // 应用筛选和搜索
@@ -836,6 +972,35 @@
             });
             
             renderStudentList(filteredStudents);
+        }
+
+        // 导出学生数据
+        function exportStudentData() {
+            const dataToExport = filteredStudents.length > 0 ? filteredStudents : students;
+            
+            if (dataToExport.length === 0) {
+                showToast("没有数据可以导出", "error");
+                return;
+            }
+            
+            // 创建CSV内容
+            let csvContent = "姓名,班级,更新时间\n";
+            dataToExport.forEach(student => {
+                csvContent += `${student.name},${student.class},${student.updateTime}\n`;
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `学生名单_${new Date().toLocaleDateString()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast(`已导出 ${dataToExport.length} 条学生数据`, "success");
         }
 
         // 从服务器加载公告
@@ -870,82 +1035,96 @@
                 if (data.data && data.data.records && data.data.records.length > 0) {
                     // 处理并显示公告数据
                     displayAnnouncements(data.data.records);
-                } 其他的 {
+                    showToast("公告数据已成功加载", "success");
+                } else {
                     // 没有数据的情况
-                    名单.innerHTML = `
-<div class="empty-state">
-<i class="fas fa-inbox empty-icon"></i>
-<h4>暂无公告</h4>
+                    announcementsList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox empty-icon"></i>
+                            <h4>暂无公告</h4>
                             <p>当前没有公告内容</p>
                         </div>
                     `;
                 }
-            } 抓住 (错误) {
-                控制台.错误('加载公告时出错:', 错误);
-                负荷指示器.风格.显示 = 'none';
-                名单.innerHTML = `
-<div class="empty-state">
-<i class=fas fa-感叹号-triangle empty-icon></i>
-<h4>加载失败</h4>
+            } catch (error) {
+                console.error('加载公告时出错:', error);
+                loadingIndicator.style.display = 'none';
+                announcementsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle empty-icon"></i>
+                        <h4>加载失败</h4>
                         <p>无法从服务器获取公告数据</p>
-<p class="small">${错误.消息}</p>
+                        <p class="small">${error.message}</p>
                     </div>
                 `;
                 
                 // 更新API状态指示器
-                apiStatus指示器.类名 = “api-指示器api-disconnected”;
-                apiStatusText.文本内容 = '服务器API连接失败';
+                apiStatusIndicator.className = 'api-indicator api-disconnected';
+                apiStatusText.textContent = '服务器API连接失败';
+                
+                showToast("公告数据加载失败", "error");
             }
         }
 
         // 显示公告列表
-        功能 displayAnnouncements(记录) {
-            名单.innerHTML = '';
+        function displayAnnouncements(records) {
+            announcementsList.innerHTML = '';
             
-            记录.<fadeInUpclass="info-value">S(${{, 缓解) => createElement
-                前锋 = 风格
+            records.forEach((record, index) => {
+                const fields = record.fields;
                 
                 // 获取公告内容、头像、时间和公告人
-                康斯特 级 = 班级[级] || 我;
-                班级 = “fas fa-延迟-毕业我-2内容[<<div 班级="announcement-time">超文本标记语言="announcement-time">
-                康斯特 班级（$）； = 外勤[”] || 级;
-                康斯特 班级 = 外勤[级] || 我;
+                const content = fields['公告内容'] || '无内容';
+                const avatar = fields['头像'] || '';
+                const time = fields['时间'] || '未知时间';
+                const publisher = fields['公告人'] || '未知发布者';
                 
-                班级 = “fas <${
-                announcementElement.类名 = 'announcement-card';
-                announcementElement.风格.级 = `toLowerCase包括 * 0.1}s`;
+                const announcementElement = document.createElement('div');
+                announcementElement.className = 'announcement-card';
+                announcementElement.style.animationDelay = `${index * 0.1}s`;
                 
                 // 构建公告HTML
-                “fas <=时间><"搜索学生姓名或班级..."
-                如果 (为了) {
-                    avatarHtml = `<img src="包括搜索词}康斯特
+                let avatarHtml = '';
+                if (avatar) {
+                    avatarHtml = `<img src="${avatar}" alt="头像" class="avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
                 }
                 
-外勤
-${
-                        异步功能}
-avatarHtml
-阿凡达
+                announcementElement.innerHTML = `
+                    <div class="card-header">
+                        ${avatarHtml}
+                        <div class="default-avatar" style="${avatar ? 'display:none' : ''}">
+                            <i class="fas fa-user"></i>
                         </div>
-${
-阿凡达
-"alt="头像"class="avatar"onerror="this. style. display='none'；this. Nextelementsiblining. style. display='flex'；">；
+                        <div class="user-info">
+                            <div class="user-name">${publisher}</div>
+                            <div class="user-role">公告发布者</div>
                         </div>
                     </div>
-announcementElement.innerHTML = `
-                        等待取来}
+                    <div class="announcement-content">
+                        ${content}
                     </div>
-selectedClass
-<div = !="card-header">
+                    <div class="announcement-time">
+                        <i class="far fa-clock"></i> ${time}
                     </div>
                 `;
                 
-我
+                announcementsList.appendChild(announcementElement);
             });
         }
 
-'公告人'!出版者
-'未知发布者'!班级
-康斯特
-announcementElement
-文档{
+        // 显示提示消息
+        function showToast(message, type = "success") {
+            toast.textContent = message;
+            toast.className = `toast ${type === "success" ? "toast-success" : "toast-error"}`;
+            toast.classList.add("show");
+            
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+
+        // 自动刷新数据（每2分钟）
+        setInterval(loadStudentsFromVika, 2 * 60 * 1000);
+    </script>
+</body>
+</html>
